@@ -16,7 +16,6 @@ export default {
         // make sure that CORS is enabled in rpc section in config.toml
         // cors_allowed_origins = ["*"]
         rpc_endpoint: "https://rpc.sentry-02.theta-testnet.polypore.xyz",
-
     },
     sender: {
         mnemonic: process.env.mnemonic,
@@ -29,14 +28,6 @@ export default {
         amount: {
             denom: "uatom",
             amount: "10000"
-        },
-        fee: {
-            amount: [
-                {
-                    amount: "1000",
-                    denom: "uatom"
-                }
-            ],
         },
         gasPrices: "0.05uatom"
     },
