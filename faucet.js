@@ -2,7 +2,7 @@ import express from 'express';
 import * as path from 'path'
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
-import { SigningStargateClient } from "@cosmjs/stargate";
+import { SigningStargateClient, GasPrice } from "@cosmjs/stargate";
 import { FrequencyChecker } from './checker.js';
 
 import conf from './config.js'
@@ -67,20 +67,18 @@ app.listen(conf.port, () => {
 
 
 async function sendTx(recipient) {
-  // const mnemonic = "surround miss nominee dream gap cross assault thank captain prosper drop duty group candy wealth weather scale put";
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(conf.sender.mnemonic, conf.sender.option);
   const [firstAccount] = await wallet.getAccounts();
 
-  // console.log("sender", firstAccount);
-
   const rpcEndpoint = conf.blockchain.rpc_endpoint;
-  const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, wallet);
-
-  // const recipient = "cosmos1xv9tklw7d82sezh9haa573wufgy59vmwe6xxe5";
+  const gasPrice = GasPrice.fromString(conf.tx.gasPrices)
   const amount = conf.tx.amount;
-  const fee = conf.tx.fee;
 
-  const result = await client.sendTokens(firstAccount.address, recipient, [amount], fee);
+  const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, wallet, {gasPrice: gasPrice} );
+
+  // 1.5 is the gas multiplier as gas is estimated automatically. ref : https://github.com/cosmos/cosmjs/blob/b4aa877843c1206104b0207f3053a7d59b2d734f/packages/cli/examples/simulate.ts
+  const result = await client.sendTokens(firstAccount.address, recipient, [amount], 1.5, "dispensing 101 NYM from faucet");
+  
   // Convert BigInt values to strings before returning result
   return JSON.parse(JSON.stringify(result, (key, value) =>
     typeof value === 'bigint' ? value.toString() : value

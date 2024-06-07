@@ -22,7 +22,7 @@ export default {
         mnemonic: process.env.mnemonic,
         option: {
             hdPaths: [stringToPath("m/44'/118'/0'/0/0")],
-            prefix: "n"
+            prefix: "cosmos"
         }
     },
     tx: {
@@ -37,8 +37,8 @@ export default {
                     denom: "uatom"
                 }
             ],
-            gas: "200000"
         },
+        gasPrices: "0.05uatom"
     },
     limit: {
         // how many times each wallet address is allowed in a window(24h)
