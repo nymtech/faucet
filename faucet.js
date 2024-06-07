@@ -3,9 +3,9 @@ import * as path from 'path'
 
 import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import { SigningStargateClient } from "@cosmjs/stargate";
-import { FrequencyChecker } from './checker';
+import { FrequencyChecker } from './checker.js';
 
-import conf from './config'
+import conf from './config.js'
 
 // load config
 console.log("loaded config: ", conf)
@@ -35,9 +35,14 @@ app.get('/send/:address', async (req, res) => {
         if( await checker.checkAddress(address) && await checker.checkIp(req.ip) ) {
           checker.update(req.ip) // get ::1 on localhost
           sendTx(address).then(ret => {
-            console.log('sent tokens to ', address)
-            checker.update(address)
-            res.send({ result: ret })
+            console.log('sent tokens to ', address);
+            checker.update(address);
+            console.log(ret);
+            // Convert BigInt values to strings before sending response
+            const result = JSON.parse(JSON.stringify(ret, (key, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            ));
+            res.send({ result });
           });
         }else {
           res.send({ result: "You requested too often" })
@@ -74,6 +79,11 @@ async function sendTx(recipient) {
   // const recipient = "cosmos1xv9tklw7d82sezh9haa573wufgy59vmwe6xxe5";
   const amount = conf.tx.amount;
   const fee = conf.tx.fee;
-  return client.sendTokens(firstAccount.address, recipient, [amount], fee);
+
+  const result = await client.sendTokens(firstAccount.address, recipient, [amount], fee);
+  // Convert BigInt values to strings before returning result
+  return JSON.parse(JSON.stringify(result, (key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  ));
 }
 
