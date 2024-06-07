@@ -40,8 +40,8 @@
         <div class="col-md-6">
           <div class="input-group">
             <input id="address" class="form-control" :placeholder="placeholder" v-model="address" name="address">
-            <button type="button" class="btn btn-custom" @click="requestToken(this)">
-              <span id="button-loading" class="spinner-border spinner-border-sm" style="display:none" role="status" aria-hidden="true"></span>
+            <button type="button" class="btn btn-custom d-flex align-items-center" @click="requestToken(this)">
+              <span id="button-loading" class="spinner-border spinner-border-sm me-2" style="display:none" role="status" aria-hidden="true"></span>
               Request NYM
             </button>
           </div>
@@ -81,12 +81,11 @@
 
             fetch(`/send/${this.address}`).then(response => response.json()).then(data => {
               obj.disabled = false
+              const dataLength = data.result ? data.result.length : 0;
               document.getElementById("button-loading").style.display = 'none';
-
               this.message = `
-              <div class="alert alert-${data.result.code === 0 ? 'success' : 'danger'} alert-dismissible fade show mt-2" role="alert">
-                ${data.result.code === 0 ? 'Token sent' : 'Request failed with :'}
-                ${JSON.stringify(data, null, 2)}
+              <div class="alert alert-${dataLength === 64 ? 'success' : 'danger'} alert-dismissible fade show mt-2" role="alert">
+                ${dataLength === 64 ? `Success! 101 NYM tokens <a class="alert-link" href="https://sandbox-blocks.nymtech.net/sandbox/tx/${data.result}"> sent </a> 🎉` : `Failed : ${data.result}`}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               </div>
               `
