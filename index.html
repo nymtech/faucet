@@ -60,8 +60,8 @@
       <div class="row g-5 justify-content-center">
         <div class="col-md-6">
           <div class="input-group">
-            <input id="address" class="form-control" :placeholder="placeholder" v-model="address" name="address">
-            <button id="request-button" type="button" class="btn btn-custom d-flex align-items-center" @click="requestToken(this)" disabled>
+            <input id="address" class="form-control" :placeholder="placeholder" v-model="address" name="address" @input="validateAddress" :class="{'is-invalid': !isValidAddress}">
+            <button id="request-button" type="button" class="btn btn-custom d-flex align-items-center" @click="requestToken(this)" :disabled="!isValidAddress || !isFaucetHealthy">
               <span id="button-loading" class="spinner-border spinner-border-sm me-2" style="display:none" role="status" aria-hidden="true"></span>
               Request NYM
             </button>
@@ -80,10 +80,12 @@
       data() {
         return {
           message: '',
-          testnet: 'Sandbox',
-          logo: 'https://ping.pub/logo.svg',
+          testnet: 'Nym Sandbox',
+          logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/nyx/images/nym_token_dark.png',
           placeholder: 'Input an address to request token',
           address: '',
+          isValidAddress: false,
+          isFaucetHealthy: false
         }
       },
       created() {
@@ -98,9 +100,13 @@
         this.checkFaucetHealth();
       },
       methods: {
+        validateAddress() {
+          const addressRegex = /^[a-z0-9]{1,}1[ac-hj-np-z02-9]{38}$/i;
+          this.isValidAddress = addressRegex.test(this.address);
+        },
         requestToken(obj) {
-          if (this.address) {
-            obj.disabled = true;
+          if (this.address && this.isValidAddress) {
+            document.getElementById("request-button").disabled = true;
             document.getElementById("button-loading").style.display = 'block';
 
             // Reset message before making the request
@@ -109,7 +115,6 @@
             fetch(`/send/${this.address}`)
               .then(response => response.json())
               .then(data => {
-                obj.disabled = false;
                 const dataLength = data.result ? data.result.length : 0;
                 document.getElementById("button-loading").style.display = 'none';
                 this.message = `
@@ -120,7 +125,7 @@
                 `;
               });
           } else {
-            this.message = '<span class="text-danger">Address is required</span>';
+            this.message = '<span class="text-danger">Invalid address input</span>';
           }
         },
         checkFaucetHealth() {
@@ -130,7 +135,7 @@
               const healthStatus = data.status === 'ok';
               const healthText = healthStatus ? 'Faucet is healthy' : (data.status === 'insufficient_funds' ? 'Faucet is low on tokens' : 'Faucet error');
               const healthColor = healthStatus ? 'text-success' : 'text-danger';
-
+              this.isFaucetHealthy = healthStatus
               const healthIndicator = document.getElementById("health-indicator");
               const healthTextElement = document.getElementById("health-text");
 
@@ -142,7 +147,7 @@
               healthTextElement.textContent = healthText;
               healthTextElement.classList.add(healthColor);
 
-              if (healthStatus) {
+              if (healthStatus && this.isValidAddress) {
                 document.getElementById("request-button").disabled = false;
               }
             })

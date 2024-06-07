@@ -27,13 +27,10 @@
     try {
       const wallet = await DirectSecp256k1HdWallet.fromMnemonic(conf.sender.mnemonic, conf.sender.option);
       const [firstAccount] = await wallet.getAccounts();
-      console.log(firstAccount);
 
       const client = await StargateClient.connect(conf.blockchain.rpc_endpoint);
       const balances = await client.getAllBalances(firstAccount.address);
       const faucet_dispense_coin = conf.tx.amount;
-
-      console.log(balances);
 
       // Find the balance for the required denomination
       const balance = balances.find(b => b.denom === faucet_dispense_coin.denom);
