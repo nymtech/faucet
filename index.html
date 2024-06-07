@@ -74,27 +74,32 @@
         });
       },
       methods: {
-        requestToken(obj) {
-          if (this.address) {
-            obj.disabled = true
-            document.getElementById("button-loading").style.display = 'block';
+  requestToken(obj) {
+    if (this.address) {
+      obj.disabled = true;
+      document.getElementById("button-loading").style.display = 'block';
 
-            fetch(`/send/${this.address}`).then(response => response.json()).then(data => {
-              obj.disabled = false
-              const dataLength = data.result ? data.result.length : 0;
-              document.getElementById("button-loading").style.display = 'none';
-              this.message = `
-              <div class="alert alert-${dataLength === 64 ? 'success' : 'danger'} alert-dismissible fade show mt-2" role="alert">
-                ${dataLength === 64 ? `Success! 101 NYM tokens <a class="alert-link" href="https://sandbox-blocks.nymtech.net/sandbox/tx/${data.result}"> sent </a> 🎉` : `Failed : ${data.result}`}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-              `
-            });
-          } else {
-            this.message = '<span class="text-danger">Address is required</span>'
-          }
-        }
-      }
+      this.message = '';
+
+      fetch(`/send/${this.address}`)
+        .then(response => response.json())
+        .then(data => {
+          obj.disabled = false;
+          const dataLength = data.result ? data.result.length : 0;
+          document.getElementById("button-loading").style.display = 'none';
+          this.message = `
+          <div class="alert alert-${dataLength === 64 ? 'success' : 'danger'} alert-dismissible fade show mt-2" role="alert">
+            ${dataLength === 64 ? `Success! 101 NYM tokens <a class="alert-link" href="https://sandbox-blocks.nymtech.net/sandbox/tx/${data.result}">sent</a>  🎉` : `Failed : ${data.result}`}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          `;
+        });
+    } else {
+      this.message = '<span class="text-danger">Address is required</span>';
+    }
+  }
+}
+
     }).mount('#app')
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
