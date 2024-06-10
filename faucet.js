@@ -80,7 +80,7 @@ app.get('/send/:address', async (req, res) => {
         // if not rate-limited
         if (await checker.checkAddress(address) && await checker.checkIp(req.ip)) {
           // if the wallet does not have tokens already
-          if (checkWalletHasExistingTokens(address)) {
+          if (await checkWalletHasExistingTokens(address)) {
             res.status(429).send({ result: "Too many requests. Wallet is already funded" })
             return;
           }
