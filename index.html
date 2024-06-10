@@ -47,6 +47,10 @@
     #health-status .text-danger {
       color: #dc3545 !important;
     }
+
+    [v-cloak] {
+      display: none;
+    }
   </style>
 </head>
 
@@ -62,10 +66,10 @@
       <div class="py-5 text-center">
         <img style="width: 10%; height: 10%" id="logo" class="d-block mx-auto mb-4" :src="logo"
           :alt="`${testnet} Faucet`">
-        <h1><span id="testnet">{{ testnet }}</span> Faucet</h1>
+        <h1><span id="testnet v-cloak">{{ testnet }}</span> Faucet</h1>
         <p class="lead mt-5">
           Ready to begin your testnet journey? ✨ <br /><br />
-          You can request <span style="color: rgb(251, 110, 78)">{{ amount }} {{ denom }} </span> tokens
+          You can request <span v-cloak style="color: rgb(251, 110, 78)">{{ amount }} {{ denom }} </span> tokens
           by submitting your wallet address below
         </p>
       </div>
@@ -74,7 +78,7 @@
           <div class="input-group">
             <input id="address" class="form-control" :placeholder="placeholder" v-model="address" name="address"
               @input="validateAddress" :class="{'is-invalid': !isValidAddress}">
-            <button id="request-button" type="button" class="btn btn-custom d-flex align-items-center"
+            <button v-cloak id="request-button" type="button" class="btn btn-custom d-flex align-items-center"
               @click="requestToken(this)" :disabled="!isValidAddress || !isFaucetHealthy">
               <span id="button-loading" class="spinner-border spinner-border-sm me-2" style="display:none" role="status"
                 aria-hidden="true"></span>
