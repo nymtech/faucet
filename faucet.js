@@ -75,8 +75,15 @@ app.get('/send/:address', async (req, res) => {
   console.log('request tokens to ', address, req.ip);
   if (address) {
     try {
+      // if valid address
       if (address.startsWith(conf.sender.option.prefix)) {
+        // if not rate-limited
         if (await checker.checkAddress(address) && await checker.checkIp(req.ip)) {
+          // if the wallet does not have tokens already
+          if (checkWalletHasExistingTokens(address)) {
+            res.status(429).send({ result: "Too many requests. Wallet is already funded" })
+            return;
+          }
 
           const txhash = await sendTx(address);
 
@@ -86,18 +93,18 @@ app.get('/send/:address', async (req, res) => {
             checker.update(address);
             res.send({ result: txhash });
           } else {
-            res.send({ result: 'Transaction hash not found' });
+            res.status(500).send({ result: "Transaction hash not found" });
           }
 
         } else {
-          res.send({ result: "Too many requests. Try again later." });
+          res.status(429).send({ result: "Too many requests. Try again later" });
         }
       } else {
-        res.send({ result: `Address ${address} is not supported.` });
+        res.send({ result: `Address ${address} is not supported` });
       }
     } catch (err) {
       console.error(err);
-      res.send({ result: 'Fatal error. Contact team!' });
+      res.status(500).send({ result: 'Fatal error. Contact team!' });
     }
 
   } else {
@@ -112,6 +119,22 @@ app.listen(conf.port, () => {
   app.set('trust proxy', true)
 })
 
+
+async function checkWalletHasExistingTokens(recipient) {
+
+  const client = await StargateClient.connect(conf.blockchain.rpc_endpoint);
+  const balances = await client.getAllBalances(recipient);
+
+  // Find the balance being dispensed in requester's bank
+  const walletBalance = balances.find(b => b.denom === conf.tx.amount.denom);
+
+  if (walletBalance && (BigInt(walletBalance.amount) >= BigInt(conf.tx.amount.amount))) {
+    return true
+  }
+
+  return false
+
+}
 
 async function sendTx(recipient) {
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(conf.sender.mnemonic, conf.sender.option);
