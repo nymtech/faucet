@@ -140,7 +140,7 @@
                 document.getElementById("button-loading").style.display = 'none';
                 this.message = `
                   <div class="alert alert-${dataLength === 64 ? 'success' : 'danger'} alert-dismissible fade show mt-2" role="alert">
-                    ${dataLength === 64 ? `Success! ${this.amount} ${this.denom} tokens <a class="alert-link" target="_blank" href="${this.txendpoint}${data.result}">sent</a>  🎉` : `Failed : ${data.result}`}
+                    ${dataLength === 64 ? `Success! ${this.amount} ${this.denom} tokens <a class="alert-link" target="_blank" href="${this.txendpoint}${data.result}">sent</a> to your wallet address  🎉` : `Failed : ${data.result}`}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
                   `;

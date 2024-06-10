@@ -108,6 +108,8 @@ app.get('/send/:address', async (req, res) => {
 
 app.listen(conf.port, () => {
   console.log(`Faucet app listening on port ${conf.port}`);
+  // To be set if reverse proxy enabled
+  app.set('trust proxy', true)
 })
 
 
