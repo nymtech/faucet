@@ -43,25 +43,31 @@ app.get('/faucet/health', async (req, res) => {
   try {
     const wallet = await DirectSecp256k1HdWallet.fromMnemonic(conf.sender.mnemonic, conf.sender.option);
     const [firstAccount] = await wallet.getAccounts();
-
+    const includeBalance = req.query.showbalance ? true : false;
     const client = await StargateClient.connect(conf.blockchain.rpc_endpoint);
     const balances = await client.getAllBalances(firstAccount.address);
-    const faucet_dispense_coin = conf.tx.amount;
+    const faucetDispenseCoin = conf.tx.amount;
 
     // Find the balance for the required denomination
-    const balance = balances.find(b => b.denom === faucet_dispense_coin.denom);
+    const balance = balances.find(b => b.denom === faucetDispenseCoin.denom);
 
-    // Check if the balance is greater than or equal to the required amount
-    if (balance && BigInt(balance.amount) >= BigInt(faucet_dispense_coin.amount)) {
-      res.send({ status: 'ok' });
-    } else {
-      res.send({ status: 'insufficient_funds' });
+    const response = { status: 'insufficient_funds' };
+
+    // Check if the balance is sufficient and update the response
+    if (balance && (BigInt(balance.amount) >= BigInt(faucetDispenseCoin.amount))) {
+      response.status = 'ok';
+      if (includeBalance) {
+        response.balance = balance;
+      }
     }
+
+    res.send(response);
   } catch (error) {
     console.error(error);
     res.status(500).send({ status: 'error', message: error.message });
   }
 });
+
 
 
 app.get('/send/:address', async (req, res) => {
@@ -116,7 +122,7 @@ async function sendTx(recipient) {
   const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, wallet, { gasPrice: gasPrice });
 
   // 1.5 is the gas multiplier. gas is estimated automatically when this is set. ref : https://github.com/cosmos/cosmjs/blob/b4aa877843c1206104b0207f3053a7d59b2d734f/packages/cli/examples/simulate.ts
-  const result = await client.sendTokens(firstAccount.address, recipient, [amount], 1.5, "dispensing 101 NYM from faucet");
+  const result = await client.sendTokens(firstAccount.address, recipient, [amount], 1.5, "dispensing tokens from faucet");
   return result && result.transactionHash ? result.transactionHash.toString() : null;
 }
 
