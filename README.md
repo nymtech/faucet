@@ -6,67 +6,23 @@ Fork of [ping.pub faucet](https://github.com/ping-pub/faucet/) to dispense Nym s
 
 ```sh
 node -v
-v16.15.0
+v22.2.0
 ```
 
 # Installation
 
- - clone code:
+ - Clone the repo:
 
  ```sh
  git clone https://github.com/nymtech/faucet.git
  ```
 
- - setup configs, you have to change everything you need in `./config.js`
- ```js
- {
-    "port": 80,  // http port
-    "db": {
-        "path": "~/.faucet.db" // db for frequency checker(WIP)
-    },
-    "blockchain": {
-        "rpc_endpoint": "https://rpc.sentry-02.theta-testnet.polypore.xyz"
-    },
-    "sender": {
-        "mnemonic": process.env.mnemonic,
-        "option": {
-            "hdPaths": ["m/44'/118'/0'/0/0"],
-            "prefix": "cosmos"  //address prefix
-        }
-    },
-    "tx": {
-        "amount": {
-            "denom": "uatom",
-            "amount": "10000" // how many does tx send for each request.
-          },
-        "fee": {
-            "amount": [
-                {
-                  "amount": "1000",
-                  "denom":  "uatom"
-                }
-            ],
-            "gas": "200000"
-        },
-        "frequency_in_24h": "1"
-    },
-    "project": {
-        "testnet": "Ping Testnet", // What ever you want, recommend: chain-id, 
-        "logo": "https://ping.pub/logo.svg",
-        "deployer": ""
-    },
-    // request limitation
-    limit: {
-        // how many times each wallet address is allowed in a window(24h)
-        address: 1,
-        // how many times each ip is allowed in a window(24h),
-        // if you use proxy, double check if the req.ip returns client's ip.
-        ip: 10
-    }
-}
- ```
- - Move `.env.example` as `.env` and populate the mnemonic for the account from which funds will be send
+ - Setup the configuration in `./config.js`
+
+ - Move `.env.example` as `.env` and populate the mnemonic for the account from which funds will be dispensed
+
  - Install dependenices with `npm install`
+
  - Run faucet
 
  ```sh
