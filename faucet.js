@@ -72,7 +72,6 @@ app.get('/faucet/health', async (req, res) => {
 
 app.get('/send/:address', async (req, res) => {
   const { address } = req.params;
-  console.log('request tokens to ', address, req.ip);
   if (address) {
     try {
       // if valid address
@@ -81,6 +80,7 @@ app.get('/send/:address', async (req, res) => {
         if (await checker.checkAddress(address) && await checker.checkIp(req.ip)) {
           // if the wallet does not have tokens already
           if (await checkWalletHasExistingTokens(address)) {
+            console.log('FAILED - well funded: request tokens to ', address, req.ip);
             res.status(429).send({ result: "Too many requests. Wallet is already funded" })
             return;
           }
@@ -91,15 +91,19 @@ app.get('/send/:address', async (req, res) => {
             // Update the rate-limit for the IP and address
             checker.update(req.ip);
             checker.update(address);
+            console.log('SUCCESS - tokens sent: request tokens to ', address, req.ip, txhash);
             res.send({ result: txhash });
           } else {
+            console.log('FAILED - tx failed: request tokens to ', address, req.ip);
             res.status(500).send({ result: "Transaction hash not found" });
           }
 
         } else {
+          console.log('FAILED - rate limited: request tokens to ', address, req.ip);
           res.status(429).send({ result: "Too many requests. Try again later" });
         }
       } else {
+        console.log('FAILED - invalid address: request tokens to ', address, req.ip);
         res.send({ result: `Address ${address} is not supported` });
       }
     } catch (err) {
