@@ -63,10 +63,10 @@
         <img style="width: 10%; height: 10%" id="logo" class="d-block mx-auto mb-4" :src="logo"
           :alt="`${testnet} Faucet`">
         <h1><span id="testnet">{{ testnet }}</span> Faucet</h1>
-        <p class="lead">
+        <p class="lead mt-5">
           Ready to begin your testnet journey? ✨ <br /><br />
-          You can request <span style="color: rgb(251, 110, 78)">101 NYM </span>testnet tokens by submitting your
-          address below
+          You can request <span style="color: rgb(251, 110, 78)">{{ amount }} {{ denom }} </span> tokens
+          by submitting your wallet address below
         </p>
       </div>
       <div class="row g-5 justify-content-center">
@@ -78,7 +78,7 @@
               @click="requestToken(this)" :disabled="!isValidAddress || !isFaucetHealthy">
               <span id="button-loading" class="spinner-border spinner-border-sm me-2" style="display:none" role="status"
                 aria-hidden="true"></span>
-              Request NYM
+              Request {{ denom }}
             </button>
           </div>
           <div id="message" class="mt-3 justify-content-center" v-html="message"></div>
@@ -98,17 +98,23 @@
           testnet: 'Nym Sandbox',
           logo: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/nyx/images/nym_token_dark.png',
           placeholder: 'Input an address to request token',
-          address: '',
+          amount: 101,
+          denom: "NYM",
+          address: "",
+          txendpoint: "",
           isValidAddress: false,
           isFaucetHealthy: false
         }
       },
       created() {
         console.log(this)
-        fetch("/config.json").then(response => response.json()).then(data => {
-          this.testnet = data.name
-          this.logo = data.logo
-          this.placeholder = `Enter your Nym wallet address (e.g.: ${data.sample}) to receive tokens`
+        fetch("/faucet/config").then(response => response.json()).then(data => {
+          this.testnet = data.name;
+          this.logo = data.logo;
+          this.txendpoint = data.tx_endpoint;
+          this.placeholder = data.sample;
+          this.amount = data.amount;
+          this.denom = data.denom;
         });
 
         // Perform health check
@@ -134,7 +140,7 @@
                 document.getElementById("button-loading").style.display = 'none';
                 this.message = `
                   <div class="alert alert-${dataLength === 64 ? 'success' : 'danger'} alert-dismissible fade show mt-2" role="alert">
-                    ${dataLength === 64 ? `Success! 101 NYM tokens <a class="alert-link" href="https://sandbox-blocks.nymtech.net/sandbox/tx/${data.result}">sent</a>  🎉` : `Failed : ${data.result}`}
+                    ${dataLength === 64 ? `Success! ${this.amount} ${this.denom} tokens <a class="alert-link" href="${this.txendpoint}${data.result}">sent</a>  🎉` : `Failed : ${data.result}`}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
                   `;

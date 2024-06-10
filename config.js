@@ -10,7 +10,7 @@ export default {
     project: {
         name: "Nym Sandbox",
         logo: "https://raw.githubusercontent.com/cosmos/chain-registry/master/nyx/images/nym_token_dark.png",
-        deployer: ""
+        tx_endpoint: "https://sandbox-blocks.nymtech.net/sandbox/tx/"
     },
     blockchain: {
         // make sure that CORS is enabled in rpc section in config.toml

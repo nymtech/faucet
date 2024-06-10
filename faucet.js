@@ -15,11 +15,27 @@ app.get('/', (req, res) => {
   res.sendFile(path.resolve('./index.html'));
 })
 
-app.get('/config.json', async (req, res) => {
+app.get('/faucet/config', async (req, res) => {
   const wallet = await DirectSecp256k1HdWallet.fromMnemonic(conf.sender.mnemonic, conf.sender.option);
   const [firstAccount] = await wallet.getAccounts();
-  const project = conf.project
-  project.sample = firstAccount.address
+  const project = conf.project;
+  project.sample = firstAccount.address;
+  project.denom = conf.tx.amount.denom;
+
+  // Parse the denom and make amount readable if there's a prefix
+  if (project.denom.startsWith('u')) {
+    project.amount = conf.tx.amount.amount / Math.pow(10, 6);
+    project.denom = project.denom.substring(1).toUpperCase();
+  } else if (project.denom.startsWith('n')) {
+    project.amount = conf.tx.amount.amount / Math.pow(10, 9);
+    project.denom = project.denom.substring(1).toUpperCase();
+  } else if (project.denom.startsWith('a')) {
+    project.amount = conf.tx.amount.amount / Math.pow(10, 18);
+    project.denom = project.denom.substring(1).toUpperCase();
+  } else {
+    project.denom = conf.tx.amount.amount
+  }
+
   res.send(project);
 })
 
@@ -68,14 +84,14 @@ app.get('/send/:address', async (req, res) => {
           }
 
         } else {
-          res.send({ result: "Too many requests ⚠️" })
+          res.send({ result: "Too many requests. Try again later." });
         }
       } else {
-        res.send({ result: `Address ${address} is not supported.` })
+        res.send({ result: `Address ${address} is not supported.` });
       }
     } catch (err) {
       console.error(err);
-      res.send({ result: 'Fatal error. Contact team!' })
+      res.send({ result: 'Fatal error. Contact team!' });
     }
 
   } else {
@@ -85,7 +101,7 @@ app.get('/send/:address', async (req, res) => {
 })
 
 app.listen(conf.port, () => {
-  console.log(`Faucet app listening on port ${conf.port}`)
+  console.log(`Faucet app listening on port ${conf.port}`);
 })
 
 
@@ -94,7 +110,7 @@ async function sendTx(recipient) {
   const [firstAccount] = await wallet.getAccounts();
 
   const rpcEndpoint = conf.blockchain.rpc_endpoint;
-  const gasPrice = GasPrice.fromString(conf.tx.gasPrices)
+  const gasPrice = GasPrice.fromString(conf.tx.gasPrices);
   const amount = conf.tx.amount;
 
   const client = await SigningStargateClient.connectWithSigner(rpcEndpoint, wallet, { gasPrice: gasPrice });
