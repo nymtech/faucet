@@ -3,7 +3,7 @@ import { stringToPath } from '@cosmjs/crypto'
 import 'dotenv/config'
 
 export default {
-    port: 80, // http port
+    port: 8000, // http port
     db: {
         path: "./db/faucet.db" // save request states
     },
@@ -15,21 +15,21 @@ export default {
     blockchain: {
         // make sure that CORS is enabled in rpc section in config.toml
         // cors_allowed_origins = ["*"]
-        rpc_endpoint: "https://rpc.sentry-02.theta-testnet.polypore.xyz",
+        rpc_endpoint: "https://rpc.sandbox.nymtech.net",
     },
     sender: {
         mnemonic: process.env.mnemonic,
         option: {
             hdPaths: [stringToPath("m/44'/118'/0'/0/0")],
-            prefix: "cosmos"
+            prefix: "n"
         }
     },
     tx: {
         amount: {
-            denom: "uatom",
-            amount: "10000"
+            denom: "unym",
+            amount: "101000000"
         },
-        gasPrices: "0.05uatom"
+        gasPrices: "0.025unym"
     },
     limit: {
         // how many times each wallet address is allowed in a window(24h)
